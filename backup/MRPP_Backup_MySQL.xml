@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<meta-runner name="Backup - MySQL">
+    <description>Backup MySQL database</description>
+    <settings>
+        <parameters>
+            <param name="system.backup.mysql.host" value="localhost" spec="text description='Database host'" />
+            <param name="system.backup.mysql.user" value="user" spec="text description='Database username'" />
+            <param name="system.backup.mysql.pass" value="pass" spec="text description='Database password'" />
+            <param name="system.backup.mysql.name" value="name" spec="text description='Database name'" />
+            <param name="system.backup.mysql.mysqldump" value="mysqldump" spec="text description='Execute full command for mysqldump'" />
+            <param name="system.backup.mysql.patch" value="/tmp/" spec="text description='Output patch backup'" />
+        </parameters>
+        <build-runners>
+            <runner id="RUNNER_14" name="" type="Ant">
+                <parameters>
+                    <param name="build-file"><![CDATA[<project default="nothing" name="BackupDatabase">
+
+    <tstamp><format property="DAY_TIME_NOW" pattern="yyyy-MM-dd_HH.mm.ss" /></tstamp>
+
+    <property name="mysqldump" value="${backup.mysql.mysqldump}"/>
+
+    <property name="db.host" value="${backup.mysql.host}"/>
+    <property name="db.user" value="${backup.mysql.user}"/>
+    <property name="db.pass" value="${backup.mysql.pass}"/>
+    <property name="db.name" value="${backup.mysql.name}"/>
+
+    <property name="file.patch" value="${backup.mysql.patch}"/>
+    <property name="file.name" value="${DAY_TIME_NOW}"/>
+
+    <target name="nothing">
+        <echo message="By default, it does nothing"/>
+    </target>
+
+    <target name="runBackup">
+        <exec executable="${mysqldump}" output="${file.patch}/${file.name}.sql">
+            <arg value="--host=${db.host}"/>
+            <arg value="--user=${db.user}"/>
+            <arg value="--password=${db.pass}"/>
+            <arg value="${db.name}"/>
+        </exec>
+
+        <tar destfile="${file.patch}/${file.name}.tar.gz"
+             compression="gzip">
+            <tarfileset dir="${file.patch}">
+                <include name="${file.name}.sql"/>
+            </tarfileset>
+        </tar>
+
+        <delete file="${file.patch}/${file.name}.sql"/>
+
+        <echo message="Completed"/>
+    </target>
+
+</project>]]></param>
+                    <param name="build-file-path" value="build.xml" />
+                    <param name="target" value="runBackup" />
+                    <param name="teamcity.coverage.emma.include.source" value="true" />
+                    <param name="teamcity.coverage.emma.instr.parameters" value="-ix -*Test*" />
+                    <param name="teamcity.coverage.idea.includePatterns" value="*" />
+                    <param name="teamcity.step.mode" value="default" />
+                    <param name="use-custom-build-file" value="true" />
+                </parameters>
+            </runner>
+        </build-runners>
+        <requirements />
+    </settings>
+</meta-runner>
