@@ -36,6 +36,7 @@
             <arg value="--host=${db.host}"/>
             <arg value="--user=${db.user}"/>
             <arg value="--password=${db.pass}"/>
+            <arg value="--single-transaction"/>
             <arg value="${db.name}"/>
         </exec>
 
